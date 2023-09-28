@@ -1,0 +1,353 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ingress-nginx-services-alerts.rules
+  namespace: ingress-nginx
+  labels:
+    release: prometheus-ingress-nginx
+spec:
+  groups:
+  - name: Ingress-Nginx-frontend--phoenix-app
+    rules:
+    - alert: NginxHighHttp4xxErrorRatePhoenix
+      expr: sum(rate(nginx_ingress_controller_requests{status=~"4..",ingress="frontend--phoenix-app"}[1m])) / sum(rate(nginx_ingress_controller_requests{ingress="frontend--phoenix-app"}[1m])) * 100 > 5
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: frontend--phoenix-app
+      annotations:
+        summary: Nginx high HTTP 4xx error rate (ingress {{ $labels.ingress }})
+        description: Too many HTTP requests with status 4xx (> 5%)
+
+    - alert: NginxHighHttp5xxErrorRatePhoenix
+      expr: sum(rate(nginx_ingress_controller_requests{status=~"^5..", ingress="frontend--phoenix-app"}[1m])) / sum(rate(nginx_ingress_controller_requests{ingress="frontend--phoenix-app"}[1m])) * 100 > 1
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: frontend--phoenix-app
+      annotations:
+        summary: Nginx high HTTP 5xx error rate (ingress {{ $labels.ingress }})
+        description: Too many HTTP requests with status 5xx (> 1%)
+
+    - alert: NginxLatencyP99HighPhoenix
+      expr: histogram_quantile(0.99, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="frontend--phoenix-app"}[1m]))) > 5
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: frontend--phoenix-app
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p99 latency is higher than 5 seconds
+
+    - alert: NginxLatencyP95HighPhoenix
+      expr: histogram_quantile(0.95, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="frontend--phoenix-app"}[1m]))) > 1
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: frontend--phoenix-app
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p95 latency is higher than 1 seconds
+
+    - alert: NginxLatencyP50HighPhoenix
+      expr: histogram_quantile(0.5, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="frontend--phoenix-app"}[1m]))) > 0.1
+      for: 1m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: frontend--phoenix-app
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p50 latency is higher than 100 milliseconds
+
+  - name: Ingress-Nginx-backend--graphql-server
+    rules:
+    - alert: NginxHighHttp4xxErrorRateGraphql
+      expr: sum(rate(nginx_ingress_controller_requests{status=~"4..",ingress="backend--graphql-server"}[1m])) / sum(rate(nginx_ingress_controller_requests{ingress="backend--graphql-server"}[1m])) * 100 > 5
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend--graphql-server
+      annotations:
+        summary: Nginx high HTTP 4xx error rate (ingress {{ $labels.ingress }})
+        description: Too many HTTP requests with status 4xx (> 5%)
+
+    - alert: NginxHighHttp5xxErrorRateGraphql
+      expr: sum(rate(nginx_ingress_controller_requests{status=~"^5..", ingress="backend--graphql-server"}[1m])) / sum(rate(nginx_ingress_controller_requests{ingress="backend--graphql-server"}[1m])) * 100 > 1
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend--graphql-server
+      annotations:
+        summary: Nginx high HTTP 5xx error rate (ingress {{ $labels.ingress }})
+        description: Too many HTTP requests with status 5xx (> 1%)
+
+    - alert: NginxLatencyP99HighGraphql
+      expr: histogram_quantile(0.99, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend--graphql-server"}[1m]))) > 5
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend--graphql-server
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p99 latency is higher than 5 seconds
+
+    - alert: NginxLatencyP95HighGraphql
+      expr: histogram_quantile(0.95, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend--graphql-server"}[1m]))) > 1
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend--graphql-server
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p95 latency is higher than 1 seconds
+
+    - alert: NginxLatencyP50HighGraphql
+      expr: histogram_quantile(0.5, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend--graphql-server"}[1m]))) > 0.1
+      for: 1m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend--graphql-server
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p50 latency is higher than 100 milliseconds
+
+
+  - name: Ingress-Nginx-backend-adin-ad-insert
+    rules:
+    - alert: NginxHighHttp4xxErrorRateAdInsert
+      expr: sum(rate(nginx_ingress_controller_requests{status=~"4..",ingress="backend-adin-ad-insert"}[1m])) / sum(rate(nginx_ingress_controller_requests{ingress="backend-adin-ad-insert"}[1m])) * 100 > 10
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-adin-ad-insert
+      annotations:
+        summary: Nginx high HTTP 4xx error rate (ingress {{ $labels.ingress }})
+        description: Too many HTTP requests with status 4xx (> 10%)
+
+    - alert: NginxHighHttp5xxErrorRateAdInsert
+      expr: sum(rate(nginx_ingress_controller_requests{status=~"^5..", ingress="backend-adin-ad-insert"}[1m])) / sum(rate(nginx_ingress_controller_requests{ingress="backend-adin-ad-insert"}[1m])) * 100 > 1
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-adin-ad-insert
+      annotations:
+        summary: Nginx high HTTP 5xx error rate (ingress {{ $labels.ingress }})
+        description: Too many HTTP requests with status 5xx (> 1%)
+
+    - alert: NginxLatencyP99HighAdInsert
+      expr: histogram_quantile(0.99, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend-adin-ad-insert"}[1m]))) > 5
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-adin-ad-insert
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p99 latency is higher than 5 seconds
+
+    - alert: NginxLatencyP95HighAdInsert
+      expr: histogram_quantile(0.95, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend-adin-ad-insert"}[1m]))) > 3
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-adin-ad-insert
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p95 latency is higher than 3 seconds
+
+    - alert: NginxLatencyP50HighAdInsert
+      expr: histogram_quantile(0.5, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend-adin-ad-insert"}[1m]))) > 1
+      for: 1m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-adin-ad-insert
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p50 latency is higher than 1 second
+
+
+  - name: Ingress-Nginx-backend--published-ads-search
+    rules:
+    - alert: NginxHighHttp4xxErrorRateSearch
+      expr: sum(rate(nginx_ingress_controller_requests{status=~"4..",ingress="backend--published-ads-search"}[1m])) / sum(rate(nginx_ingress_controller_requests{ingress="backend--published-ads-search"}[1m])) * 100 > 5
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend--published-ads-search
+      annotations:
+        summary: Nginx high HTTP 4xx error rate (ingress {{ $labels.ingress }})
+        description: Too many HTTP requests with status 4xx (> 5%)
+
+    - alert: NginxHighHttp5xxErrorRateSearch
+      expr: sum(rate(nginx_ingress_controller_requests{status=~"^5..", ingress="backend--published-ads-search"}[1m])) / sum(rate(nginx_ingress_controller_requests{ingress="backend--published-ads-search"}[1m])) * 100 > 1
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend--published-ads-search
+      annotations:
+        summary: Nginx high HTTP 5xx error rate (ingress {{ $labels.ingress }})
+        description: Too many HTTP requests with status 5xx (> 1%)
+
+    - alert: NginxLatencyP99HighSearch
+      expr: histogram_quantile(0.99, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend--published-ads-search"}[1m]))) > 5
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend--published-ads-search
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p99 latency is higher than 5 seconds
+
+    - alert: NginxLatencyP95HighSearch
+      expr: histogram_quantile(0.95, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend--published-ads-search"}[1m]))) > 1
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend--published-ads-search
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p95 latency is higher than 1 seconds
+
+    - alert: NginxLatencyP50HighSearch
+      expr: histogram_quantile(0.5, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend--published-ads-search"}[1m]))) > 0.1
+      for: 1m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend--published-ads-search
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p50 latency is higher than 100 milliseconds
+
+
+  - name: Ingress-Nginx-backend-adout-listing
+    rules:
+    - alert: NginxHighHttp4xxErrorRateListing
+      expr: sum(rate(nginx_ingress_controller_requests{status=~"4..",ingress="backend-adout-listing"}[1m])) / sum(rate(nginx_ingress_controller_requests{ingress="backend-adout-listing"}[1m])) * 100 > 5
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-adout-listing
+      annotations:
+        summary: Nginx high HTTP 4xx error rate (ingress {{ $labels.ingress }})
+        description: Too many HTTP requests with status 4xx (> 5%)
+
+    - alert: NginxHighHttp5xxErrorRateListing
+      expr: sum(rate(nginx_ingress_controller_requests{status=~"^5..", ingress="backend-adout-listing"}[1m])) / sum(rate(nginx_ingress_controller_requests{ingress="backend-adout-listing"}[1m])) * 100 > 1
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-adout-listing
+      annotations:
+        summary: Nginx high HTTP 5xx error rate (ingress {{ $labels.ingress }})
+        description: Too many HTTP requests with status 5xx (> 1%)
+
+    - alert: NginxLatencyP99HighListing
+      expr: histogram_quantile(0.99, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend-adout-listing"}[1m]))) > 5
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-adout-listing
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p99 latency is higher than 5 seconds
+
+    - alert: NginxLatencyP95HighListing
+      expr: histogram_quantile(0.95, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend-adout-listing"}[1m]))) > 1
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-adout-listing
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p95 latency is higher than 1 seconds
+
+    - alert: NginxLatencyP50HighListing
+      expr: histogram_quantile(0.5, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend-adout-listing"}[1m]))) > 0.1
+      for: 1m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-adout-listing
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p50 latency is higher than 100 milliseconds
+
+  - name: Ingress-Nginx-backend-images--yams-proxy
+    rules:
+    - alert: NginxHighHttp4xxErrorRateYams
+      expr: sum(rate(nginx_ingress_controller_requests{status=~"4..",ingress="backend-images--yams-proxy"}[1m])) / sum(rate(nginx_ingress_controller_requests{ingress="backend-images--yams-proxy"}[1m])) * 100 > 5
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-images--yams-proxy
+      annotations:
+        summary: Nginx high HTTP 4xx error rate (ingress {{ $labels.ingress }})
+        description: Too many HTTP requests with status 4xx (> 5%)
+
+    - alert: NginxHighHttp5xxErrorRateYams
+      expr: sum(rate(nginx_ingress_controller_requests{status=~"^5..", ingress="backend-images--yams-proxy"}[1m])) / sum(rate(nginx_ingress_controller_requests{ingress="backend-images--yams-proxy"}[1m])) * 100 > 1
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-images--yams-proxy
+      annotations:
+        summary: Nginx high HTTP 5xx error rate (ingress {{ $labels.ingress }})
+        description: Too many HTTP requests with status 5xx (> 1%)
+
+    - alert: NginxLatencyP99HighYams
+      expr: histogram_quantile(0.99, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend-images--yams-proxy"}[1m]))) > 5
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-images--yams-proxy
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p99 latency is higher than 5 seconds
+
+    - alert: NginxLatencyP95HighYams
+      expr: histogram_quantile(0.95, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend-images--yams-proxy"}[1m]))) > 1
+      for: 2m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-images--yams-proxy
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p95 latency is higher than 1 seconds
+
+    - alert: NginxLatencyP50HighYams
+      expr: histogram_quantile(0.5, sum by (le)(rate(nginx_ingress_controller_request_duration_seconds_bucket{ingress="backend-images--yams-proxy"}[1m]))) > 0.2
+      for: 1m
+      labels:
+        slack: ingress-nginx
+        severity: critical
+        ingress: backend-images--yams-proxy
+      annotations:
+        summary: Nginx latency high (ingress {{ $labels.ingress }})
+        description: Nginx p50 latency is higher than 200 milliseconds

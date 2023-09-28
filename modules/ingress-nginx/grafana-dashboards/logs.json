@@ -1,0 +1,431 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "green",
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "center",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "date"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 201
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "message"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 205
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 20,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "10.2.0",
+      "targets": [
+        {
+          "builderOptions": {
+            "aggregates": [],
+            "columns": [
+              {
+                "custom": false,
+                "name": "*",
+                "type": "String"
+              }
+            ],
+            "database": "logs",
+            "filters": [
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "key": "date",
+                "operator": ">=",
+                "type": "DateTime64(3, 'UTC')",
+                "value": "GRAFANA_START_TIME"
+              },
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "key": "date",
+                "operator": "<=",
+                "type": "DateTime64(3, 'UTC')",
+                "value": "GRAFANA_END_TIME"
+              },
+              {
+                "condition": "AND",
+                "filterType": "custom",
+                "key": "log_type",
+                "operator": "=",
+                "type": "Enum8('HTTP_REQUEST' = 1, 'OTHER' = 2)",
+                "value": "$log_type"
+              }
+            ],
+            "groupBy": [],
+            "limit": 100,
+            "meta": {},
+            "mode": "list",
+            "orderBy": [
+              {
+                "dir": "DESC",
+                "name": "date"
+              }
+            ],
+            "queryType": "table",
+            "table": "ingress_nginx"
+          },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "${datasource}"
+          },
+          "editorType": "sql",
+          "format": 1,
+          "meta": {
+            "builderOptions": {
+              "aggregates": [],
+              "columns": [
+                {
+                  "custom": false,
+                  "name": "*",
+                  "type": "String"
+                }
+              ],
+              "database": "logs",
+              "filters": [
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "key": "date",
+                  "operator": ">=",
+                  "type": "DateTime64(3, 'UTC')",
+                  "value": "GRAFANA_START_TIME"
+                },
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "key": "date",
+                  "operator": "<=",
+                  "type": "DateTime64(3, 'UTC')",
+                  "value": "GRAFANA_END_TIME"
+                },
+                {
+                  "condition": "AND",
+                  "filterType": "custom",
+                  "key": "log_type",
+                  "operator": "=",
+                  "type": "Enum8('HTTP_REQUEST' = 1, 'OTHER' = 2)",
+                  "value": "$log_type"
+                }
+              ],
+              "groupBy": [],
+              "limit": 100,
+              "meta": {},
+              "mode": "list",
+              "orderBy": [
+                {
+                  "dir": "DESC",
+                  "name": "date"
+                }
+              ],
+              "queryType": "table",
+              "table": "ingress_nginx"
+            }
+          },
+          "pluginVersion": "4.0.2",
+          "queryType": "table",
+          "rawSql": "SELECT date, message, remote_addr_ipv6, host, method, path, version, status, request_time_sec, request_length_bytes, http_referer, http_user_agent, body_bytes_sent, ingress_name, proxy_upstream_name, upstream_response_length_bytes, upstream_response_time_sec, upstream_status \nFROM \"logs\".\"ingress_nginx\" \nWHERE ( date >= $__fromTime ) AND ( date <= $__toTime ) AND ( log_type IN($log_type) )\nAND ( ingress_name IN($ingress_name) ) \nAND ( host IN($host) ) \nAND ( status IN($status) ) \nAND ( path like '$path' ) \nAND ( toString(remote_addr_ipv6) like '$remote_addr_ipv6' ) \nORDER BY date DESC\nLIMIT $limit",
+          "refId": "A"
+        }
+      ],
+      "title": "Logs",
+      "type": "table"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 38,
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "ClickHouse-logs",
+          "value": "c90318ca-f89e-474e-bcfc-bd81bb00c6c5"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "grafana-clickhouse-datasource",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "HTTP_REQUEST"
+          ],
+          "value": [
+            "HTTP_REQUEST"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "${datasource}"
+        },
+        "definition": "SELECT log_type FROM logs.ingress_nginx \nWHERE ( date >= $__fromTime ) AND ( date <= $__toTime )\nGROUP BY log_type",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "log_type",
+        "options": [],
+        "query": "SELECT log_type FROM logs.ingress_nginx \nWHERE ( date >= $__fromTime ) AND ( date <= $__toTime )\nGROUP BY log_type",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "${datasource}"
+        },
+        "definition": "SELECT ingress_name FROM logs.ingress_nginx \nWHERE ( date >= $__fromTime ) AND ( date <= $__toTime )\nGROUP BY ingress_name",
+        "hide": 0,
+        "includeAll": true,
+        "label": "upstream",
+        "multi": true,
+        "name": "ingress_name",
+        "options": [],
+        "query": "SELECT ingress_name FROM logs.ingress_nginx \nWHERE ( date >= $__fromTime ) AND ( date <= $__toTime )\nGROUP BY ingress_name",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "${datasource}"
+        },
+        "definition": "SELECT host FROM logs.ingress_nginx \nWHERE ( ingress_name IN($ingress_name) )\nAND ( date >= $__fromTime ) AND ( date <= $__toTime )\nGROUP BY host",
+        "hide": 0,
+        "includeAll": true,
+        "label": "",
+        "multi": true,
+        "name": "host",
+        "options": [],
+        "query": "SELECT host FROM logs.ingress_nginx \nWHERE ( ingress_name IN($ingress_name) )\nAND ( date >= $__fromTime ) AND ( date <= $__toTime )\nGROUP BY host",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "type": "grafana-clickhouse-datasource",
+          "uid": "${datasource}"
+        },
+        "definition": "SELECT status FROM logs.ingress_nginx \nWHERE ( date >= $__fromTime ) AND ( date <= $__toTime )\nAND ( ingress_name IN($ingress_name) )\nAND ( host IN($host) )\nGROUP BY status",
+        "hide": 0,
+        "includeAll": true,
+        "label": "",
+        "multi": true,
+        "name": "status",
+        "options": [],
+        "query": "SELECT status FROM logs.ingress_nginx \nWHERE ( date >= $__fromTime ) AND ( date <= $__toTime )\nAND ( ingress_name IN($ingress_name) )\nAND ( host IN($host) )\nGROUP BY status",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "%",
+          "value": "%"
+        },
+        "description": "",
+        "hide": 0,
+        "label": "",
+        "name": "path",
+        "options": [
+          {
+            "selected": true,
+            "text": "%",
+            "value": "%"
+          }
+        ],
+        "query": "%",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "%",
+          "value": "%"
+        },
+        "description": "If you're filtering for ipv4 , prefix the pattern with % (because all IPs are written in IPv6 format)",
+        "hide": 0,
+        "label": "ip",
+        "name": "remote_addr_ipv6",
+        "options": [
+          {
+            "selected": true,
+            "text": "%",
+            "value": "%"
+          }
+        ],
+        "query": "%",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "100",
+          "value": "100"
+        },
+        "hide": 0,
+        "name": "limit",
+        "options": [
+          {
+            "selected": true,
+            "text": "100",
+            "value": "100"
+          }
+        ],
+        "query": "100",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Logs",
+  "uid": "b4fd7ae1-ecff-4344-aebd-c3a8a790de40",
+  "version": 1,
+  "weekStart": ""
+}
